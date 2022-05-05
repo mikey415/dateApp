@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using API.Data;
-using API.Entities;
-using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
+using API.Data;
 using API.DTOS;
-using Microsoft.EntityFrameworkCore;
+using API.Entities;
 using API.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -46,8 +43,9 @@ namespace API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AppUser>> Login(LoginDto loginDto){
-            var user = await Context.Users.SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
+        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto){
+            var user = await Context.Users
+                .SingleOrDefaultAsync(x => x.UserName == loginDto.Username);
 
             if (user == null) return Unauthorized("Invalid username");
 
@@ -55,12 +53,16 @@ namespace API.Controllers
 
             var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
 
-            for(int i = 0; i < computedHash.Length; i++)
+            for (int i = 0; i < computedHash.Length; i++)
             {
-                if(computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
+                if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
             }
 
-            return user;
+            return new UserDto
+            {
+                Username = user.UserName,
+                Token = Tokenservice.CreateToken(user)
+            };
         }
 
         private async Task<bool> UsernameTaken(string username){
