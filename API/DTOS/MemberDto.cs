@@ -8,7 +8,7 @@ namespace API.DTOS
 {
     public class MemberDto
     {
-         public int Id { get; set; }
+        public int Id { get; set; }
 
         public string UserName { get; set; }
 
@@ -21,6 +21,8 @@ namespace API.DTOS
         public DateTime LastActive { get; set; }
 
         public string Gender { get; set; }
+
+        public string Introduction { get; set; }
 
         public string LookingFor { get; set; }
 
